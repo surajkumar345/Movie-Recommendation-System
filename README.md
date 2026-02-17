@@ -19,3 +19,5 @@ A content-based Movie Recommendation System built using:
 
 pip install -r requirements.txt
 streamlit run app.py
+Note: similarity.pkl file is too large to upload on GitHub.
+It can be generated using the Jupyter notebook.
