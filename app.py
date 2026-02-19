@@ -123,7 +123,7 @@ st.sidebar.info("This Movie Recommendation System uses Content-Based Filtering w
 selected_movie = st.selectbox(
     "Choose a movie",
     movies['title'].values,
-    key="movie_select_2"
+    key="movie_select_1234"
 )
 
 # ------------------ RECOMMEND BUTTON ------------------
