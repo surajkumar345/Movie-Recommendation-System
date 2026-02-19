@@ -47,8 +47,7 @@ st.markdown("<h1 style='text-align: center;'>🎬 Movie Recommendation System</h
 
 selected_movie_name = st.selectbox(
     "Select a movie",
-    movies['title'].values,
-    key="movie_select_1")
+    movies['title'].values)
 
 if st.button('Recommend'):
     names, posters = recommend(selected_movie_name)
@@ -122,7 +121,7 @@ st.sidebar.info("This Movie Recommendation System uses Content-Based Filtering w
 
 # ------------------ SELECT BOX ------------------
 selected_movie = st.selectbox(
-    "Select a movie",
+    "Choose a movie",
     movies['title'].values,
     key="movie_select_2"
 )
