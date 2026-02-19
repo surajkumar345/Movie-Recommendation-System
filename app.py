@@ -49,7 +49,7 @@ selected_movie_name = st.selectbox(
     "Select a movie",
     movies['title'].values)
 
-if st.button('Recommend'):
+if st.button('Recommend',key="recommended_btn_1"):
     names, posters = recommend(selected_movie_name)
 
     st.write("## 🎥 Recommended Movies")
@@ -127,7 +127,7 @@ selected_movie = st.selectbox(
 )
 
 # ------------------ RECOMMEND BUTTON ------------------
-if st.button("Recommend"):
+if st.button("Recommend",key="recommended_btn-2"):
     with st.spinner("Finding best movies for you... 🎬"):
         names, posters = recommend(selected_movie)
 
