@@ -57,36 +57,43 @@ st.write("")
 st.sidebar.title("About")
 st.sidebar.info("This Movie Recommendation System uses Content-Based Filtering with Cosine Similarity.")
 
-# ------------------ SELECT BOX ------------------
-selected_movie = st.selectbox(
-    "Choose a movie",
-    movies['title'].values,
-    key="movie_select_1234"
+# ------------------ SEARCH BAR ------------------
+st.markdown("### 🔎 Search Movie")
+
+search_query = st.text_input(
+    "",
+    placeholder="Type movie name here...",
+    key="search_input"
 )
 
-# ------------------ RECOMMEND BUTTON ------------------
-if st.button("Recommend",key="recommended_btn-2"):
+selected_movie = None
+
+if search_query:
+    filtered_movies = movies[
+        movies['title'].str.contains(search_query, case=False, na=False)
+    ]
+
+    if not filtered_movies.empty:
+        selected_movie = st.selectbox(
+            "Select from results",
+            filtered_movies['title'].values,
+            key="filtered_movie_select"
+        )
+    else:
+        st.warning("No movie found 😢")
+
+st.write("")
+
+if selected_movie and st.button("✨ Show Recommendations", key="recommend_button"):
     with st.spinner("Finding best movies for you... 🎬"):
+
         names, posters = recommend(selected_movie)
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+        st.write("## 🎥 Recommended For You")
 
-    with col1:
-        st.image(posters[0])
-        st.caption(names[0])
+        cols = st.columns(5)
 
-    with col2:
-        st.image(posters[1])
-        st.caption(names[1])
-
-    with col3:
-        st.image(posters[2])
-        st.caption(names[2])
-
-    with col4:
-        st.image(posters[3])
-        st.caption(names[3])
-
-    with col5:
-        st.image(posters[4])
-        st.caption(names[4])
+        for col, name, poster in zip(cols, names, posters):
+            with col:
+                st.image(poster)
+                st.markdown(f"<b>{name}</b>", unsafe_allow_html=True)
