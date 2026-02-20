@@ -76,8 +76,8 @@ movies = pd.DataFrame(movies_dict)
 
 similarity = pickle.load(open('similarity.pkl', 'rb'))
 
-# ------------------ FETCH POSTER FUNCTION ------------------
-        def fetch_movie_details(movie_id):
+# ------------------ FETCH POSTER FUNCTION ------------------ 
+def fetch_movie_details(movie_id):
     api_key = "3d815c36541b7f27658d61cc3c3dd6c2"
     url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&language=en-US"
     
