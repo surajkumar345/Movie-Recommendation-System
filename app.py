@@ -22,20 +22,41 @@ st.set_page_config(
 st.markdown("""
 <style>
 
+/* Page background */
 body {
     background-color: #0E1117;
 }
 
+/* Main title */
 .main-title {
     text-align: center;
     font-size: 48px;
     font-weight: bold;
-    background: -webkit-linear-gradient(45deg, #ff4b2b, #ff416c);
+    background: linear-gradient(45deg, #ff4b2b, #ff416c);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
 }
 
+/* Search Bar Style */
+div[data-baseweb="input"] > div {
+    background-color: #1c1f26 !important;
+    border-radius: 30px !important;
+    border: 1px solid #333 !important;
+    padding: 10px !important;
+}
+
+div[data-baseweb="input"] input {
+    color: white !important;
+    font-size: 16px !important;
+}
+
+div[data-baseweb="input"] > div:focus-within {
+    border: 1px solid #ff416c !important;
+    box-shadow: 0 0 10px rgba(255,65,108,0.6);
+}
+
+/* Movie Card */
 .movie-card {
     background-color: #1e1e1e;
     padding: 12px;
@@ -67,8 +88,7 @@ body {
 </style>
 """, unsafe_allow_html=True)
 
-# ------------------ GRADIENT TITLE ------------------
-st.markdown("<div class='main-title'>🎬 Movie Recommendation System</div>", unsafe_allow_html=True)
+
 
 # ------------------ LOAD DATA ------------------
 movies_dict = pickle.load(open('movie_dict.pkl', 'rb'))
@@ -134,7 +154,7 @@ def show_popular_movies():
         col = cols[idx % 5]
 
         with col:
-            poster = fetch_poster(row.movie_id)
+            poster, rating, genres = fetch_poster(row.movie_id)
             st.image(poster)
             st.caption(row.title)
 
@@ -143,7 +163,7 @@ st.sidebar.title("About")
 st.sidebar.info("This Movie Recommendation System uses Content-Based Filtering with Cosine Similarity.")
 
 # ------------------ SEARCH BAR ------------------
-st.markdown("### 🔎 Search Movie")
+st.markdown("<div style='text-align:center; font-size:22px; margin-bottom:10px;'>🔎 Find Your Favorite Movie</div>", unsafe_allow_html=True)
 
 search_query = st.text_input(
     "",
@@ -170,7 +190,6 @@ if search_query:
 if not search_query:
     show_popular_movies()
 
-st.write("")
 #----------------- BUTTOM FNCTION ------------------
 if selected_movie and st.button("✨ Show Recommendations", key="recommend_button"):
     with st.spinner("Finding best movies for you... 🎬"):
