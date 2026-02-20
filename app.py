@@ -25,39 +25,102 @@ movies = pd.DataFrame(movies_dict)
 similarity = pickle.load(open('similarity.pkl', 'rb'))
 
 # ------------------ FETCH POSTER FUNCTION ------------------
-def fetch_poster(movie_id):
-    api_key = "3d815c36541b7f27658d61cc3c3dd6c2"   # 👈 Yahan apni API key daalo
+        def fetch_movie_details(movie_id):
+    api_key = "3d815c36541b7f27658d61cc3c3dd6c2"
     url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&language=en-US"
-    data = requests.get(url)
-    data = data.json()
-    poster_path = data.get('poster_path')
+    
+    data = requests.get(url).json()
 
-    if poster_path:
-        return "https://image.tmdb.org/t/p/w500/" + poster_path
-    else:
-        return "https://via.placeholder.com/300x450?text=No+Image"
+    poster_path = data.get('poster_path')
+    rating = data.get('vote_average')
+    genres = [genre['name'] for genre in data.get('genres', [])]
+
+    poster_url = (
+        "https://image.tmdb.org/t/p/w500/" + poster_path
+        if poster_path
+        else "https://via.placeholder.com/300x450?text=No+Image"
+    )
+
+    return poster_url, rating, ", ".join(genres)
 
 # ------------------ RECOMMEND FUNCTION ------------------
 def recommend(movie):
     movie_index = movies[movies['title'] == movie].index[0]
     distances = similarity[movie_index]
 
-    movies_list = sorted(list(enumerate(distances)),
-                         reverse=True,
-                         key=lambda x: x[1])[1:6]
+    movies_list = sorted(
+        list(enumerate(distances)),
+        reverse=True,
+        key=lambda x: x[1]
+    )[1:11]   # 🔥 10 movies
 
     recommended_movies = []
-    recommended_posters = []
 
     for i in movies_list:
         movie_id = movies.iloc[i[0]].movie_id
-        recommended_movies.append(movies.iloc[i[0]].title)
-        recommended_posters.append(fetch_poster(movie_id))
+        title = movies.iloc[i[0]].title
+        poster, rating, genres = fetch_movie_details(movie_id)
 
-    return recommended_movies, recommended_posters
+        recommended_movies.append({
+            "title": title,
+            "poster": poster,
+            "rating": rating,
+            "genres": genres
+        })
 
-# ------------------ TITLE ------------------
-st.markdown("<h1 style='text-align: center;'>🎬 Movie Recommendation System</h1>", unsafe_allow_html=True)
+    return recommended_movies
+
+# ------------------ CUSTOM CSS ------------------
+st.markdown("""
+<style>
+
+body {
+    background-color: #0E1117;
+}
+
+.main-title {
+    text-align: center;
+    font-size: 48px;
+    font-weight: bold;
+    background: -webkit-linear-gradient(45deg, #ff4b2b, #ff416c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 30px;
+}
+
+.movie-card {
+    background-color: #1e1e1e;
+    padding: 12px;
+    border-radius: 15px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.movie-card:hover {
+    transform: scale(1.07);
+    box-shadow: 0px 0px 15px rgba(255, 65, 108, 0.6);
+}
+
+.movie-title {
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+.movie-rating {
+    color: gold;
+    font-size: 14px;
+}
+
+.movie-genre {
+    font-size: 12px;
+    color: #bbb;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ------------------ GRADIENT TITLE ------------------
+st.markdown("<div class='main-title'>🎬 Movie Recommendation System</div>", unsafe_allow_html=True)
 
 st.write("")
 
@@ -91,17 +154,28 @@ if search_query:
         st.warning("No movie found 😢")
 
 st.write("")
-
+#----------------- BUTTOM FNCTION ------------------
 if selected_movie and st.button("✨ Show Recommendations", key="recommend_button"):
     with st.spinner("Finding best movies for you... 🎬"):
 
-        names, posters = recommend(selected_movie)
+        recommended_movies = recommend(selected_movie)
 
-        st.write("## 🎥 Recommended For You")
+        st.markdown("## 🎥 Recommended For You")
 
         cols = st.columns(5)
 
-        for col, name, poster in zip(cols, names, posters):
+        for idx, movie in enumerate(recommended_movies):
+            col = cols[idx % 5]
+
             with col:
-                st.image(poster)
-                st.markdown(f"<b>{name}</b>", unsafe_allow_html=True)
+                st.markdown(
+                    f"""
+                    <div class="movie-card">
+                        <img src="{movie['poster']}" width="100%">
+                        <div class="movie-title">{movie['title']}</div>
+                        <div class="movie-rating">⭐ {movie['rating']}</div>
+                        <div class="movie-genre">{movie['genres']}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
