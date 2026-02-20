@@ -154,7 +154,7 @@ def show_popular_movies():
         col = cols[idx % 5]
 
         with col:
-            poster, rating, genres = fetch_poster(row.movie_id)
+            poster, rating, genres = fetch_movie_details(row.movie_id)
             st.image(poster)
             st.caption(row.title)
 
@@ -183,12 +183,12 @@ if search_query:
             "Select from results",
             filtered_movies['title'].values,
             key="filtered_movie_select"
+    if not search_query:
+        show_popular_movies()        
         )
     else:
         st.warning("No movie found 😢")
 
-if not search_query:
-    show_popular_movies()
 
 #----------------- BUTTOM FNCTION ------------------
 if selected_movie and st.button("✨ Show Recommendations", key="recommend_button"):
