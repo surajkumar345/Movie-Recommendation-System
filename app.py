@@ -183,9 +183,10 @@ if search_query:
             "Select from results",
             filtered_movies['title'].values,
             key="filtered_movie_select"
-    if not search_query:
-        show_popular_movies()        
         )
+    if not search_query:
+        show_popular_movies()   
+
     else:
         st.warning("No movie found 😢")
 
