@@ -18,58 +18,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# ------------------ LOAD DATA ------------------
-movies_dict = pickle.load(open('movie_dict.pkl', 'rb'))
-movies = pd.DataFrame(movies_dict)
-
-similarity = pickle.load(open('similarity.pkl', 'rb'))
-
-# ------------------ FETCH POSTER FUNCTION ------------------
-        def fetch_movie_details(movie_id):
-    api_key = "3d815c36541b7f27658d61cc3c3dd6c2"
-    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&language=en-US"
-    
-    data = requests.get(url).json()
-
-    poster_path = data.get('poster_path')
-    rating = data.get('vote_average')
-    genres = [genre['name'] for genre in data.get('genres', [])]
-
-    poster_url = (
-        "https://image.tmdb.org/t/p/w500/" + poster_path
-        if poster_path
-        else "https://via.placeholder.com/300x450?text=No+Image"
-    )
-
-    return poster_url, rating, ", ".join(genres)
-
-# ------------------ RECOMMEND FUNCTION ------------------
-def recommend(movie):
-    movie_index = movies[movies['title'] == movie].index[0]
-    distances = similarity[movie_index]
-
-    movies_list = sorted(
-        list(enumerate(distances)),
-        reverse=True,
-        key=lambda x: x[1]
-    )[1:11]   # 🔥 10 movies
-
-    recommended_movies = []
-
-    for i in movies_list:
-        movie_id = movies.iloc[i[0]].movie_id
-        title = movies.iloc[i[0]].title
-        poster, rating, genres = fetch_movie_details(movie_id)
-
-        recommended_movies.append({
-            "title": title,
-            "poster": poster,
-            "rating": rating,
-            "genres": genres
-        })
-
-    return recommended_movies
-
 # ------------------ CUSTOM CSS ------------------
 st.markdown("""
 <style>
@@ -122,7 +70,73 @@ body {
 # ------------------ GRADIENT TITLE ------------------
 st.markdown("<div class='main-title'>🎬 Movie Recommendation System</div>", unsafe_allow_html=True)
 
-st.write("")
+# ------------------ LOAD DATA ------------------
+movies_dict = pickle.load(open('movie_dict.pkl', 'rb'))
+movies = pd.DataFrame(movies_dict)
+
+similarity = pickle.load(open('similarity.pkl', 'rb'))
+
+# ------------------ FETCH POSTER FUNCTION ------------------
+        def fetch_movie_details(movie_id):
+    api_key = "3d815c36541b7f27658d61cc3c3dd6c2"
+    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&language=en-US"
+    
+    data = requests.get(url).json()
+
+    poster_path = data.get('poster_path')
+    rating = data.get('vote_average')
+    genres = [genre['name'] for genre in data.get('genres', [])]
+
+    poster_url = (
+        "https://image.tmdb.org/t/p/w500/" + poster_path
+        if poster_path
+        else "https://via.placeholder.com/300x450?text=No+Image"
+    )
+
+    return poster_url, rating, ", ".join(genres)
+
+# ------------------ RECOMMEND FUNCTION ------------------
+def recommend(movie):
+    movie_index = movies[movies['title'] == movie].index[0]
+    distances = similarity[movie_index]
+
+    movies_list = sorted(
+        list(enumerate(distances)),
+        reverse=True,
+        key=lambda x: x[1]
+    )[1:11]   # 🔥 10 movies
+
+    recommended_movies = []
+
+    for i in movies_list:
+        movie_id = movies.iloc[i[0]].movie_id
+        title = movies.iloc[i[0]].title
+        poster, rating, genres = fetch_movie_details(movie_id)
+
+        recommended_movies.append({
+            "title": title,
+            "poster": poster,
+            "rating": rating,
+            "genres": genres
+        })
+
+    return recommended_movies
+
+    # ------------------ POPULAR MOVIES ------------------
+def show_popular_movies():
+    st.markdown("## 🔥 Popular Movies")
+
+    popular_movies = movies.head(20)  # First 20 movies
+
+    cols = st.columns(5)
+
+    for idx, (_, row) in enumerate(popular_movies.iterrows()):
+        col = cols[idx % 5]
+
+        with col:
+            poster = fetch_poster(row.movie_id)
+            st.image(poster)
+            st.caption(row.title)
 
 # ------------------ SIDEBAR ------------------
 st.sidebar.title("About")
@@ -152,6 +166,9 @@ if search_query:
         )
     else:
         st.warning("No movie found 😢")
+
+if not search_query:
+    show_popular_movies()
 
 st.write("")
 #----------------- BUTTOM FNCTION ------------------
