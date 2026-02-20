@@ -2,6 +2,14 @@ import streamlit as st
 import pickle
 import pandas as pd
 import requests
+import os
+import gdown
+
+file_id = "1bVtmYxUBJdbm1Mj7mdBpwR71aXkJ80f4"
+url = f"https://drive.google.com/uc?id={file_id}"
+
+if not os.path.exists("similarity.pkl"):
+    gdown.download(url, "similarity.pkl", quiet=False)
 
 # ------------------ PAGE CONFIG ------------------
 st.set_page_config(
