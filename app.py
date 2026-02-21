@@ -88,7 +88,28 @@ div[data-baseweb="input"] > div:focus-within {
 </style>
 """, unsafe_allow_html=True)
 
+.hero-card {
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    color: white;
+    transform: scale(1.02);
+}
 
+.hero-card img {
+    border-radius: 15px;
+    margin-bottom: 10px;
+}
+
+.hero-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.hero-rating {
+    font-size: 14px;
+}
 
 # ------------------ LOAD DATA ------------------
 movies_dict = pickle.load(open('movie_dict.pkl', 'rb'))
@@ -116,32 +137,52 @@ def fetch_movie_details(movie_id):
     return poster_url, rating, ", ".join(genres)
 
 # ------------------ RECOMMEND FUNCTION ------------------
-def recommend(movie):
-    movie_index = movies[movies['title'] == movie].index[0]
-    distances = similarity[movie_index]
+if selected_movie and st.button("✨ Show Recommendations", key="recommend_button"):
+    with st.spinner("Finding best movies for you... 🎬"):
 
-    movies_list = sorted(
-        list(enumerate(distances)),
-        reverse=True,
-        key=lambda x: x[1]
-    )[1:11]   # 🔥 10 movies
+        recommended_movies = recommend(selected_movie)
 
-    recommended_movies = []
+        st.markdown("## 🎥 Recommended For You")
 
-    for i in movies_list:
-        movie_id = movies.iloc[i[0]].movie_id
-        title = movies.iloc[i[0]].title
-        poster, rating, genres = fetch_movie_details(movie_id)
+        # 🔥 Top 3 Highlight
+        st.markdown("### ⭐ Top Picks")
+        top_cols = st.columns(3)
 
-        recommended_movies.append({
-            "title": title,
-            "poster": poster,
-            "rating": rating,
-            "genres": genres
-        })
+        for i in range(3):
+            movie = recommended_movies[i]
+            with top_cols[i]:
+                st.markdown(
+                    f"""
+                    <div class="hero-card">
+                        <img src="{movie['poster']}" width="100%">
+                        <div class="hero-title">{movie['title']}</div>
+                        <div class="hero-rating">⭐ {movie['rating']} | {movie['genres']}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
-    return recommended_movies
+        st.markdown("### 🎬 More Like This")
 
+        # Remaining 7 Movies
+        cols = st.columns(5)
+
+        for idx, movie in enumerate(recommended_movies[3:]):
+            col = cols[idx % 5]
+
+            with col:
+                st.markdown(
+                    f"""
+                    <div class="movie-card">
+                        <img src="{movie['poster']}" width="100%">
+                        <div class="movie-title">{movie['title']}</div>
+                        <div class="movie-rating">⭐ {movie['rating']}</div>
+                        <div class="movie-genre">{movie['genres']}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+                
     # ------------------ POPULAR MOVIES ------------------
 def show_popular_movies():
     st.markdown("## 🔥 Popular Movies")
@@ -187,8 +228,6 @@ if search_query:
     if not search_query:
         show_popular_movies()   
 
-    else:
-        st.warning("No movie found 😢")
 
 
 #----------------- BUTTOM FNCTION ------------------
