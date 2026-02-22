@@ -19,7 +19,7 @@ if not os.path.exists("similarity.pkl"):
         quiet=False
     )
 
-# ================= API SECURITY =================
+# ================= API SECURITY. =================
 try:
     api_key = st.secrets["TMDB_API_KEY"]
 except:
