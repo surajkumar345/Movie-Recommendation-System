@@ -2,13 +2,22 @@ import streamlit as st
 import pickle
 import pandas as pd
 import requests
-
+import os
+import gdown
 # ================= PAGE CONFIG =================
 st.set_page_config(
     page_title="Movie Recommender",
     page_icon="🎬",
     layout="wide"
 )
+
+# ================== DOWNLOAD FILES ==================
+if not os.path.exists("similarity.pkl"):
+    gdown.download(
+        "https://drive.google.com/uc?id=1bVtmYxUBJdbm1Mj7mdBpwR71aXkJ80f4",
+        "similarity.pkl",
+        quiet=False
+    )
 
 # ================= API SECURITY =================
 try:
