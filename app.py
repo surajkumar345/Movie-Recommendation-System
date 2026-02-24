@@ -5,7 +5,7 @@ import requests
 import os
 import gdown
 import openai 
-# ================= PAGE CONFIG =================
+# ================= PAGE CONFIG =================#
 st.set_page_config(
     page_title="Movie Recommender",
     page_icon="🎬",
