@@ -4,9 +4,6 @@ numpy
 scikit-learn
 pickle-mixin
 gdown
-streamlit
-pandas
-numpy
 requests
-scikit-learn
+openai
 
