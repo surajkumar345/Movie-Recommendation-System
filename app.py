@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 import os
 import gdown
-from openai import openAI
+import openai
 # ================= PAGE CONFIG =================
 st.set_page_config(
     page_title="Movie Recommender",
