@@ -12,7 +12,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------------- CONFIG ---------------- #
+# ---------------- CONFIG ---------------- ##
 
 st.set_page_config(page_title="Jarvis Movie App", layout="wide")
 
