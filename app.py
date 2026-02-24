@@ -146,7 +146,7 @@ def recommend(movie):
 
     return recommended
 
-# ================= SIDEBAR =================
+# ================= SIDEBAR =================#
 st.sidebar.title("🎭 Filter By Genre")
 genres = fetch_genres()
 selected_genre = st.sidebar.selectbox("Select Genre",genre_names)
