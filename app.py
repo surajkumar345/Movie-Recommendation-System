@@ -87,6 +87,12 @@ def fetch_trailer(movie_id):
             return video["key"]
     return None
 
+# Fetch Genres
+def fetch_genres():
+    url = f"https://api.themoviedb.org/3/genre/movie/list?api_key={api_key}"
+    data = requests.get(url).json()
+    return data["genres"]
+
 def fetch_movies_by_genre(genre_id):
     url = f"https://api.themoviedb.org/3/discover/movie?api_key={api_key}&with_genres={genre_id}"
     data = requests.get(url).json()
