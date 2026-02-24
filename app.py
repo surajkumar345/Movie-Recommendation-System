@@ -179,7 +179,7 @@ def recommend(movie):
     return recommended
 
 # 🤖 SECTION 1 — AI MOVIE RECOMMENDATION (OpenAI)
-# =====================================================
+# =====================================================#
 
 st.header("🤖 Ask Jarvis")
 
