@@ -221,15 +221,7 @@ if st.button("🎯 Recommend"):
 
     else:
         st.warning("No matching movie found.")
-
- selected_movie = st.selectbox(
-    "Select Movie",
-    movies["title"].values
-
- if selected_movie.strip() == "":
-    st.warning("Please type a movie name.")
-    st.stop())
-
+        
 # ================= GENRE SECTION =================
 if selected_genre != "None":
     st.subheader(f"🎬 {selected_genre} Movies")
