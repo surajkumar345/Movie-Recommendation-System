@@ -223,38 +223,55 @@ if st.button("🎯 Recommend"):
         st.warning("No matching movie found.")
         
 # ================= GENRE SECTION =================
-if selected_genre != "None":
-    st.subheader(f"🎬 {selected_genre} Movies")
+st.header("🎭 Browse By Genre")
 
-    genre_movies = fetch_movies_by_genre(genres[selected_genre])
+genres = fetch_genres()
+
+selected_genre = st.selectbox("Select Genre", list(genres.keys()))
+
+if selected_genre:
+
+    genre_id = genres[selected_genre]
+    genre_movies = fetch_movies_by_genre(genre_id)
+
     cols = st.columns(5)
 
-for idx, movie in enumerate(genre_movies):
-    with cols[idx % 5]:
+    for idx, movie in enumerate(genre_movies):
 
-        st.image(movie["poster"])
-        st.markdown(f"**{movie['title']}**")
-        st.caption(f"⭐ {movie['rating']}")
+        with cols[idx % 5]:
 
-        if movie["trailer"]:
-            if st.button("▶ Trailer", key=f"genre_trailer_{idx}"):
-                st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+            st.markdown('<div class="movie-card">', unsafe_allow_html=True)
 
+            st.image(movie["poster"])
+            st.markdown(f'<div class="movie-title">{movie["title"]}</div>', unsafe_allow_html=True)
+            st.caption(f"⭐ {movie['rating']}")
+
+            if movie["trailer"]:
+                if st.button("▶ Trailer", key=f"genre_trailer_{idx}"):
+                    st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+
+            st.markdown('</div>', unsafe_allow_html=True)
             
 
  # ================= POPULAR MOVIES =================
-st.subheader("🔥 Popular Movies")
+st.header("🔥 Popular Movies")
+
 popular_movies = fetch_popular_movies()
 
 cols = st.columns(5)
 
 for idx, movie in enumerate(popular_movies):
+
     with cols[idx % 5]:
 
+        st.markdown('<div class="movie-card">', unsafe_allow_html=True)
+
         st.image(movie["poster"])
-        st.markdown(f"**{movie['title']}**")
+        st.markdown(f'<div class="movie-title">{movie["title"]}</div>', unsafe_allow_html=True)
         st.caption(f"⭐ {movie['rating']}")
 
         if movie["trailer"]:
             if st.button("▶ Trailer", key=f"pop_trailer_{idx}"):
                 st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+
+        st.markdown('</div>', unsafe_allow_html=True)
