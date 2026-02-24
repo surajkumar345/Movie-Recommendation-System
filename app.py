@@ -199,11 +199,6 @@ if user_prompt:
         reply = response.choices[0].message.content
         st.success(reply)
 
-# ================= SIDEBAR =================#
-st.sidebar.title("🎭 Filter By Genre")
-genres = fetch_genres()
-selected_genre = st.sidebar.selectbox("Select Genre",genre_names)
-
 # ================ SEARCH SECTION WITH MODAL ============ #
 
 st.header("🔎 Search Movies")
