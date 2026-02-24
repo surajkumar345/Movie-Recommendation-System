@@ -4,12 +4,29 @@ import pandas as pd
 import requests
 import os
 import gdown
+from openai import openAI
 # ================= PAGE CONFIG =================
 st.set_page_config(
     page_title="Movie Recommender",
     page_icon="🎬",
     layout="wide"
 )
+
+# ---------------- CONFIG ---------------- #
+
+st.set_page_config(page_title="Jarvis Movie App", layout="wide")
+
+
+# ---------------- TITLE ---------------- #
+
+st.title("🎬 Jarvis AI Movie App")
+
+# Load API Keys from secrets
+openai_key = st.secrets["OPENAI_API_KEY"]
+
+# Initialize OpenAI
+client = OpenAI(api_key=openai_key)
+
 
 # ================== DOWNLOAD FILES ==================
 if not os.path.exists("similarity.pkl"):
@@ -113,6 +130,21 @@ def fetch_movies_by_genre(genre_id):
 
     return movies_list
 
+# 0PEN AI 
+def ai_recommend(movie_overview):
+
+    openai.api_key = st.secrets["OPENAI_API_KEY"]
+
+    response = openai.ChatCompletion.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are a movie recommendation expert."},
+            {"role": "user", "content": f"Suggest 5 movies similar to this story: {movie_overview}"}
+        ]
+    )
+
+    return response.choices[0].message["content"]
+
 #============= RECOMMENDATION FUNCTION ===================
 def recommend(movie):
 
@@ -145,6 +177,27 @@ def recommend(movie):
         })
 
     return recommended
+
+# 🤖 SECTION 1 — AI MOVIE RECOMMENDATION (OpenAI)
+# =====================================================
+
+st.header("🤖 Ask Jarvis")
+
+user_prompt = st.text_input("Ask for movie recommendations (e.g. Best sci-fi movies)")
+
+if user_prompt:
+    with st.spinner("Jarvis is thinking..."):
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a movie expert assistant."},
+                {"role": "user", "content": user_prompt}
+            ]
+        )
+
+        reply = response.choices[0].message.content
+        st.success(reply)
 
 # ================= SIDEBAR =================#
 st.sidebar.title("🎭 Filter By Genre")
