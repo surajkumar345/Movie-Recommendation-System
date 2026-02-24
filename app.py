@@ -160,8 +160,8 @@ def recommend(movie):
             "poster": poster,
             "rating": rating,
             "overview": overview,
-            "similarity": similarity_score
-            "trailer": trailer
+            "similarity": similarity_score,
+            "trailer": trailer,
         })
 
     return recommended
