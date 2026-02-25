@@ -5,5 +5,4 @@ scikit-learn
 pickle-mixin
 gdown
 requests
-openai
 
