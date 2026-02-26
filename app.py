@@ -209,9 +209,9 @@ if search_query:
                 st.markdown(f"**{movie['title']}**")
                 st.caption(f"⭐ {movie['rating']}")
 
-               if movie["trailer"]:
-                   with st.expander("▶ Watch Trailer"):
-                       st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+                if movie["trailer"]:
+                    with st.expander("▶ Watch Trailer"):
+                        st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
                     
                    
     else:
@@ -281,9 +281,9 @@ if selected_genre_id:
             st.markdown(f"**{movie['title']}**")
             st.caption(f"⭐ {movie['rating']}")
 
-           if movie["trailer"]:
-               with st.expander("▶ Watch Trailer"):
-                   st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+            if movie["trailer"]:
+                with st.expander("▶ Watch Trailer"):
+                    st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
 # =============== POPULAR MOVIES SECTION WITH MODAL ================ #
 
 st.header("🔥 Popular Movies")
@@ -336,6 +336,6 @@ for idx, movie in enumerate(popular_movies):
         st.markdown(f"**{movie['title']}**")
         st.caption(f"⭐ {movie['rating']}")
 
-       if movie["trailer"]:
-           with st.expander("▶ Watch Trailer"):
-               st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+        if movie["trailer"]:
+            with st.expander("▶ Watch Trailer"):
+                st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
