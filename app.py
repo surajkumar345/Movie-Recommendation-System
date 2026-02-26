@@ -27,6 +27,8 @@ except:
     st.stop()
 
 #==============  COUSTOM ===========================
+st.markdown(
+    """
 <style>
 
 /* ----------- GLOBAL ----------- */
@@ -132,7 +134,9 @@ body {
 }
 
 </style>
-
+""",
+unsafe_allow_html=True 
+)
 #=========== MOOD CHOICE ==================
 MOOD_MAP = {
     "😊 Happy": {
