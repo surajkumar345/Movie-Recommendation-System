@@ -26,7 +26,7 @@ except:
     st.error("TMDB API Key not found. Check secrets.toml")
     st.stop()
 
-#============== HTML COUSTOM ===========================
+#==============  COUSTOM ===========================
 <style>
 
 /* ----------- GLOBAL ----------- */
@@ -91,7 +91,75 @@ body {
     opacity: 1;
 }
 
+.slider-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 16px;
+    padding: 10px 0;
+}
+
+.slider-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.slider-container::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 10px;
+}
+
+.movie-card {
+    min-width: 160px;
+    background-color: #1c1f26;
+    border-radius: 12px;
+    padding: 8px;
+    transition: transform 0.3s;
+}
+
+.movie-card:hover {
+    transform: scale(1.08);
+}
+
+.movie-card img {
+    border-radius: 10px;
+}
+
+.movie-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 6px;
+    color: white;
+    text-align: center;
+}
+
 </style>
+
+#=========== MOOD CHOICE ==================
+MOOD_MAP = {
+    "😊 Happy": {
+        "genres": "35,10751",
+        "keywords": "fun,feel good"
+    },
+    "😢 Sad": {
+        "genres": "18,10749",
+        "keywords": "emotional"
+    },
+    "🔥 Action": {
+        "genres": "28,12",
+        "keywords": "fight,war"
+    },
+    "❤️ Romantic": {
+        "genres": "10749",
+        "keywords": "love"
+    },
+    "😱 Thriller": {
+        "genres": "53,27",
+        "keywords": "suspense"
+    },
+    "🧠 Mind-Bending": {
+        "genres": "878,9648",
+        "keywords": "mystery,twist"
+    }
+}
 
 # ================= LOAD DATA =================
 movies = pickle.load(open("model.pkl", "rb"))
@@ -166,6 +234,53 @@ def fetch_movies_by_genre(genre_id):
 
     return movies_list
 
+#------fetch movie by mood-------------------
+def fetch_movies_by_mood(genre_ids, keywords):
+    url = (
+        f"https://api.themoviedb.org/3/discover/movie?"
+        f"api_key={api_key}"
+        f"&with_genres={genre_ids}"
+        f"&sort_by=popularity.desc"
+    )
+
+    data = requests.get(url).json()
+
+    movies = []
+
+    for movie in data.get("results", [])[:10]:
+        trailer = fetch_trailer(movie["id"])
+        poster = (
+            f"https://image.tmdb.org/t/p/w500{movie['poster_path']}"
+            if movie.get("poster_path") else None
+        )
+
+        movies.append({
+            "id": movie["id"],
+            "title": movie["title"],
+            "poster": poster,
+            "rating": movie["vote_average"],
+            "trailer": trailer
+        })
+
+    return movies
+
+#----------- Autocomplete search--------------
+def autocomplete_movies(query):
+    if len(query) < 2:
+        return []
+
+    url = f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={query}"
+    data = requests.get(url).json()
+
+    suggestions = []
+
+    for movie in data.get("results", [])[:8]:
+        suggestions.append({
+            "id": movie["id"],
+            "title": movie["title"]
+        })
+
+    return suggestions
 #========= WHY RECOMMEND =====================
 def recommendation_reason(similarity):
     if similarity >= 85:
@@ -230,60 +345,52 @@ def recommend(movie):
     return recommended
 
 # ================ SEARCH SECTION WITH MODAL ============ #
-
 st.header("🔎 Search Movies")
 
-search_query = st.text_input("Type movie name...")
+query = st.text_input(
+    "Search",
+    placeholder="Type movie name...",
+)
+# ---------- SHOW SUGGESTIONS ----------
+if results:
+    movie_titles = [movie["title"] for movie in results]
 
-def search_movies(query):
-    url = f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={query}"
-    data = requests.get(url).json()
+    selected_title = st.selectbox(
+        "Suggestions",
+        movie_titles,
+        label_visibility="collapsed"
+    )
 
-    movies = []
+    selected_movie = None
+    for movie in results:
+        if movie["title"] == selected_title:
+            selected_movie = movie
+            break
 
-    for movie in data.get("results", [])[:10]:
+    if selected_movie:
+        poster = (
+            f"https://image.tmdb.org/t/p/w500{selected_movie['poster_path']}"
+            if selected_movie.get("poster_path") else None
+        )
 
-        poster = f"https://image.tmdb.org/t/p/w500{movie['poster_path']}" if movie["poster_path"] else None
-        trailer = fetch_trailer(movie["id"])
+        st.markdown("## 🎬 Movie Details")
 
-        movies.append({
-            "id": movie["id"],
-            "title": movie["title"],
-            "poster": poster,
-            "rating": movie["vote_average"],
-            "overview": movie["overview"],
-            "trailer": trailer
-        })
+        col1, col2 = st.columns([1, 2])
 
-    return movies
+        with col1:
+            if poster:
+                st.image(poster)
 
+        with col2:
+            st.markdown(f"### {selected_movie['title']}")
+            st.write(f"⭐ Rating: {selected_movie['vote_average']}")
+            st.write(selected_movie.get("overview", "No overview available."))
 
-if search_query:
+            trailer = fetch_trailer(selected_movie["id"])
 
-    search_results = search_movies(search_query)
-
-    if search_results:
-
-        cols = st.columns(5)
-
-        for idx, movie in enumerate(search_results):
-
-            with cols[idx % 5]:
-
-                if movie["poster"]:
-                    ott_movie_card(movie, "popular")
-
-                ott_movie_card(f"**{movie['title']}**")
-                st.caption(f"⭐ {movie['rating']}")
-                
-                if movie.get("reason"):
-                    st.markdown("### 🤖 Why this movie?")
-                    st.info(movie["reason"])
-
-                if movie["trailer"]:
-                    with st.expander("▶ Watch Trailer"):
-                        st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
-                    
+            if trailer:
+                with st.expander("▶ Watch Trailer"):
+                    st.video(f"https://www.youtube.com/watch?v={trailer}")
                    
     else:
         st.warning("No movies found 😔")
@@ -399,17 +506,25 @@ def fetch_popular_movies():
 
 popular_movies = fetch_popular_movies()
 
-cols = st.columns(5)
+slider_html = "<div class='slider-container'>"
 
-for idx, movie in enumerate(popular_movies):
+for movie in popular_movies:
+    poster = (
+        f"https://image.tmdb.org/t/p/w500{movie['poster_path']}"
+        if movie.get("poster_path")
+        else "https://via.placeholder.com/300x450?text=No+Image"
+    )
 
-    with cols[idx % 5]:
+    slider_html += f"""
+    <div class="movie-card">
+        <img src="{poster}" width="150">
+        <div class="movie-title">{movie['title']}</div>
+    </div>
+    """
 
-        if movie["poster"]:
-            ott_movie_card(movie, "popular")
+slider_html += "</div>"
 
-        ott_movie_card(f"**{movie['title']}**")
-        st.caption(f"⭐ {movie['rating']}")
+st.markdown(slider_html, unsafe_allow_html=True)
         
         if movie.get("reason"):
             st.markdown("### 🤖 Why this movie?")
@@ -418,3 +533,36 @@ for idx, movie in enumerate(popular_movies):
         if movie["trailer"]:
             with st.expander("▶ Watch Trailer"):
                 st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+
+#================= MOOD SECTION ============================               
+st.header("🎭 Pick Your Mood")
+
+selected_mood = st.selectbox(
+    "How are you feeling today?",
+    list(MOOD_MAP.keys())
+)
+
+if selected_mood:
+    mood_data = MOOD_MAP[selected_mood]
+    mood_movies = fetch_movies_by_mood(
+        mood_data["genres"],
+        mood_data["keywords"]
+    )
+
+    cols = st.columns(5)
+
+    for idx, movie in enumerate(mood_movies):
+        with cols[idx % 5]:
+
+            if movie["poster"]:
+                ott_movie_card(movie, "popular")
+
+            ott_movie_card (f"**{movie['title']}**")
+            st.caption(f"⭐ {movie['rating']}")
+
+            if movie["trailer"]:
+                with st.expander("▶ Watch Trailer"):
+                    st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+
+
+                 show_mood_trailer()
