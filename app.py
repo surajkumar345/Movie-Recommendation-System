@@ -26,35 +26,72 @@ except:
     st.error("TMDB API Key not found. Check secrets.toml")
     st.stop()
 
-#============== CSS COUSTOM ===========================
-st.markdown("""
+#============== HTML COUSTOM ===========================
 <style>
 
+/* ----------- GLOBAL ----------- */
 body {
-    background-color: #0e1117;
+    background: linear-gradient(180deg, #0e1117, #000000);
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
 }
 
+/* ----------- MOVIE CARD ----------- */
 .movie-card {
-    background-color: #1c1f26;
-    padding: 12px;
-    border-radius: 12px;
-    transition: 0.3s;
-    text-align: center;
+    background: rgba(28, 31, 38, 0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    padding: 10px;
+    transition: 0.35s ease-in-out;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    position: relative;
+    overflow: hidden;
 }
 
 .movie-card:hover {
-    transform: scale(1.05);
+    transform: translateY(-8px) scale(1.03);
 }
 
+/* ----------- POSTER ----------- */
+.movie-card img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+/* ----------- TITLE ----------- */
 .movie-title {
+    margin-top: 8px;
     font-size: 15px;
     font-weight: 600;
+}
+
+/* ----------- RATING ----------- */
+.movie-rating {
+    color: gold;
+    font-size: 14px;
+}
+
+/* ----------- TRAILER OVERLAY ----------- */
+.trailer-btn {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.7);
     color: white;
-    margin-top: 8px;
+    padding: 12px 18px;
+    border-radius: 50px;
+    font-size: 16px;
+    opacity: 0;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.movie-card:hover .trailer-btn {
+    opacity: 1;
 }
 
 </style>
-""", unsafe_allow_html=True)
 
 # ================= LOAD DATA =================
 movies = pickle.load(open("model.pkl", "rb"))
@@ -129,6 +166,35 @@ def fetch_movies_by_genre(genre_id):
 
     return movies_list
 
+#========= WHY RECOMMEND =====================
+def recommendation_reason(similarity):
+    if similarity >= 85:
+        return "🔥 Very strong match based on genre, storyline, and themes."
+    elif similarity >= 70:
+        return "✅ Recommended due to similar genre and plot structure."
+    elif similarity >= 55:
+        return "🎯 Suggested because of overlapping keywords and movie style."
+    else:
+        return "📌 Recommended based on general viewing patterns."
+
+#============== OTT MOVIE CARD ==========================
+def ott_movie_card(movie, key_prefix):
+    st.markdown(
+        f"""
+        <div class="movie-card">
+            <img src="{movie['poster']}"/>
+            <div class="trailer-btn">▶ Trailer</div>
+            <div class="movie-title">{movie['title']}</div>
+            <div class="movie-rating">⭐ {round(movie['rating'],1)}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    if movie.get("trailer"):
+        with st.expander("▶ Watch Trailer"):
+            st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+
 #============= RECOMMENDATION FUNCTION ===================
 def recommend(movie):
 
@@ -157,6 +223,7 @@ def recommend(movie):
             "rating": rating,
             "overview": overview,
             "similarity": similarity_score,
+            "reason": recommendation_reason(similarity_score),
             "trailer": trailer,
         })
 
@@ -204,10 +271,14 @@ if search_query:
             with cols[idx % 5]:
 
                 if movie["poster"]:
-                    st.image(movie["poster"])
+                    ott_movie_card(movie, "popular")
 
-                st.markdown(f"**{movie['title']}**")
+                ott_movie_card(f"**{movie['title']}**")
                 st.caption(f"⭐ {movie['rating']}")
+                
+                if movie.get("reason"):
+                    st.markdown("### 🤖 Why this movie?")
+                    st.info(movie["reason"])
 
                 if movie["trailer"]:
                     with st.expander("▶ Watch Trailer"):
@@ -276,10 +347,14 @@ if selected_genre_id:
         with cols[idx % 5]:
 
             if movie["poster"]:
-                st.image(movie["poster"])
+                ott_movie_card(movie, "popular")
 
-            st.markdown(f"**{movie['title']}**")
+            ott_movie_card (f"**{movie['title']}**")
             st.caption(f"⭐ {movie['rating']}")
+            
+            if movie.get("reason"):
+                st.markdown("### 🤖 Why this movie?")
+                st.info(movie["reason"])
 
             if movie["trailer"]:
                 with st.expander("▶ Watch Trailer"):
@@ -331,10 +406,14 @@ for idx, movie in enumerate(popular_movies):
     with cols[idx % 5]:
 
         if movie["poster"]:
-            st.image(movie["poster"])
+            ott_movie_card(movie, "popular")
 
-        st.markdown(f"**{movie['title']}**")
+        ott_movie_card(f"**{movie['title']}**")
         st.caption(f"⭐ {movie['rating']}")
+        
+        if movie.get("reason"):
+            st.markdown("### 🤖 Why this movie?")
+            st.info(movie["reason"])
 
         if movie["trailer"]:
             with st.expander("▶ Watch Trailer"):
