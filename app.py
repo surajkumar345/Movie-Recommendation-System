@@ -431,39 +431,47 @@ def fetch_movies_by_genre(genre_id):
 
     return movies
 
-# Get Genre List
+
 genres = fetch_genres()
-genre_names = [genre["name"] for genre in genres]
+genre_map = {g["name"]: g["id"] for g in genres}
 
-selected_genre_name = st.selectbox("Select Genre", genre_names)
+selected_genre = st.selectbox("Choose Genre", genre_map.keys())
 
-# Find selected genre ID
-selected_genre_id = None
-for genre in genres:
-    if genre["name"] == selected_genre_name:
-        selected_genre_id = genre["id"]
-        break
+genre_movies = fetch_movies_by_genre(genre_map[selected_genre])
 
-# Show Movies
-if selected_genre_id:
+# ---------- SLIDER ----------
+genre_html = "<div class='slider-container'>"
 
-    genre_movies = fetch_movies_by_genre(selected_genre_id)
+for movie in genre_movies:
+    poster = (
+        movie["poster"]
+        if movie["poster"]
+        else "https://via.placeholder.com/300x450?text=No+Image"
+    )
 
-    cols = st.columns(5)
+    genre_html += f"""
+    <div class="movie-card">
+        <img src="{poster}" width="150">
+        <div class="movie-title">{movie['title']}</div>
+    </div>
+    """
 
-    for idx, movie in enumerate(genre_movies):
+genre_html += "</div>"
+st.markdown(genre_html, unsafe_allow_html=True)
 
-        with cols[idx % 5]:
+# ---------- TRAILER ----------
+selected_genre_movie = st.selectbox(
+    "🎬 Watch Genre Trailer",
+    [m["title"] for m in genre_movies],
+    key="genre_select"
+)
 
-            if movie["poster"]:
-                ott_movie_card(movie, "popular")
+for movie in genre_movies:
+    if movie["title"] == selected_genre_movie and movie["trailer"]:
+        with st.expander("▶ Play Trailer"):
+            st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
 
-            ott_movie_card (f"**{movie['title']}**")
-            st.caption(f"⭐ {movie['rating']}")
 
-            if movie["trailer"]:
-                with st.expander("▶ Watch Trailer"):
-                    st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
 # =============== POPULAR MOVIES SECTION WITH MODAL ================ #
 
 st.header("🔥 Popular Movies")
@@ -504,6 +512,7 @@ def fetch_popular_movies():
 
 popular_movies = fetch_popular_movies()
 
+# ---------- OTT SLIDER ----------
 slider_html = "<div class='slider-container'>"
 
 for movie in popular_movies:
@@ -521,13 +530,26 @@ for movie in popular_movies:
     """
 
 slider_html += "</div>"
-
 st.markdown(slider_html, unsafe_allow_html=True)
-        
-        if movie["trailer"]:
-            with st.expander("▶ Watch Trailer"):
-                st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
 
+# ---------- TRAILER USING EXPANDER ----------
+st.subheader("🎬 Watch Trailer")
+
+selected_movie = st.selectbox(
+    "Select a popular movie",
+    [movie["title"] for movie in popular_movies],
+    key="popular_select"
+)
+
+for movie in popular_movies:
+    if movie["title"] == selected_movie:
+        trailer_key = fetch_trailer(movie["id"])
+
+        if trailer_key:
+            with st.expander("▶ Play Trailer"):
+                st.video(f"https://www.youtube.com/watch?v={trailer_key}")
+        else:
+            st.info("Trailer not available")
 #================= MOOD SECTION ============================               
 st.header("🎭 Pick Your Mood")
 
