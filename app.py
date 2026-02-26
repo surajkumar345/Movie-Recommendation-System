@@ -579,6 +579,3 @@ if selected_mood:
             if movie["trailer"]:
                 with st.expander("▶ Watch Trailer"):
                     st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
-
-
-                 show_mood_trailer()
