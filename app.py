@@ -356,6 +356,7 @@ query = st.text_input(
     placeholder="Type movie name...",
 )
 # ---------- SHOW SUGGESTIONS ----------
+results[]    #initialize 
 if results:
     movie_titles = [movie["title"] for movie in results]
 
