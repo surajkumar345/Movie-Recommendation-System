@@ -431,7 +431,6 @@ def fetch_movies_by_genre(genre_id):
 
     return movies
 
-
 # Get Genre List
 genres = fetch_genres()
 genre_names = [genre["name"] for genre in genres]
@@ -444,7 +443,6 @@ for genre in genres:
     if genre["name"] == selected_genre_name:
         selected_genre_id = genre["id"]
         break
-
 
 # Show Movies
 if selected_genre_id:
@@ -462,10 +460,6 @@ if selected_genre_id:
 
             ott_movie_card (f"**{movie['title']}**")
             st.caption(f"⭐ {movie['rating']}")
-            
-            if movie.get("reason"):
-                st.markdown("### 🤖 Why this movie?")
-                st.info(movie["reason"])
 
             if movie["trailer"]:
                 with st.expander("▶ Watch Trailer"):
@@ -530,10 +524,6 @@ slider_html += "</div>"
 
 st.markdown(slider_html, unsafe_allow_html=True)
         
-        if movie.get("reason"):
-            st.markdown("### 🤖 Why this movie?")
-            st.info(movie["reason"])
-
         if movie["trailer"]:
             with st.expander("▶ Watch Trailer"):
                 st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
