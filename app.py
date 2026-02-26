@@ -571,11 +571,8 @@ if selected_mood:
     for idx, movie in enumerate(mood_movies):
         with cols[idx % 5]:
 
-            if movie["poster"]:
+            if movie.get["poster"]:
                 ott_movie_card(movie, "popular")
-
-            ott_movie_card (f"**{movie['title']}**")
-            st.caption(f"⭐ {movie['rating']}")
 
             if movie["trailer"]:
                 with st.expander("▶ Watch Trailer"):
