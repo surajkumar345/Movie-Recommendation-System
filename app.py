@@ -90,12 +90,8 @@ def display_movie(movie):
     trailer_url = fetch_trailer(movie["id"])
 
     if trailer_url:
-        @st.dialog(f"{movie['title']} Trailer")
-        def show_trailer():
-            st.video(trailer_url)
-
-        if st.button("▶ Trailer", key=f"trailer_{movie['id']}"):
-            show_trailer()
+        with st.expander("▶ Watch Trailer"):
+            st.video(f"https://www.youtube.com/watch?v={trailer_url}")
 
 # Fetch Trailer
 def fetch_trailer(movie_id):
@@ -214,13 +210,10 @@ if search_query:
                 st.caption(f"⭐ {movie['rating']}")
 
                if movie["trailer"]:
-
-                    @st.dialog(f"🎬 {movie['title']} Trailer")
-                    def show_search_trailer():
-                        st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
-
-                    if st.button("▶ Trailer", key=f"search_trailer_{idx}"):
-                        show_search_trailer()
+                   with st.expander("▶ Watch Trailer"):
+                       st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+                    
+                   
     else:
         st.warning("No movies found 😔")
         
@@ -289,13 +282,8 @@ if selected_genre_id:
             st.caption(f"⭐ {movie['rating']}")
 
            if movie["trailer"]:
-
-               @st.dialog(f"🎬 {movie['title']} Trailer")
-               def show_genre_trailer():
+               with st.expander("▶ Watch Trailer"):
                    st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
-
-               if st.button("▶ Trailer", key=f"genre_trailer_{idx}"):
-                   show_genre_trailer()
 # =============== POPULAR MOVIES SECTION WITH MODAL ================ #
 
 st.header("🔥 Popular Movies")
@@ -348,12 +336,6 @@ for idx, movie in enumerate(popular_movies):
         st.markdown(f"**{movie['title']}**")
         st.caption(f"⭐ {movie['rating']}")
 
-        if movie["trailer"]:
-
-             @st.dialog(f"🎬 {movie['title']} Trailer")
-            def show_popular_trailer():
-                st.markdown("### Enjoy the Trailer 🍿")
-                st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
-
-           if st.button("▶ Trailer", key=f"popular_trailer_{idx}"):
-               show_popular_trailer()
+       if movie["trailer"]:
+           with st.expander("▶ Watch Trailer"):
+               st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
