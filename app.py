@@ -440,26 +440,6 @@ selected_genre = st.selectbox("Choose Genre", genre_map.keys())
 
 genre_movies = fetch_movies_by_genre(genre_map[selected_genre])
 
-# ---------- SLIDER ----------
-genre_html = "<div class='slider-container'>"
-
-for movie in genre_movies:
-    poster = (
-        movie["poster"]
-        if movie["poster"]
-        else "https://via.placeholder.com/300x450?text=No+Image"
-    )
-
-    genre_html += f"""
-    <div class="movie-card">
-        <img src="{poster}" width="150">
-        <div class="movie-title">{movie['title']}</div>
-    </div>
-    """
-
-genre_html += "</div>"
-st.markdown(genre_html, unsafe_allow_html=True)
-
 # ---------- TRAILER ----------
 selected_genre_movie = st.selectbox(
     "🎬 Watch Genre Trailer",
@@ -512,26 +492,6 @@ def fetch_popular_movies():
 
 
 popular_movies = fetch_popular_movies()
-
-# ---------- OTT SLIDER ----------
-slider_html = "<div class='slider-container'>"
-
-for movie in popular_movies:
-    poster = (
-        f"https://image.tmdb.org/t/p/w500{movie['poster_path']}"
-        if movie.get("poster_path")
-        else "https://via.placeholder.com/300x450?text=No+Image"
-    )
-
-    slider_html += f"""
-    <div class="movie-card">
-        <img src="{poster}" width="150">
-        <div class="movie-title">{movie['title']}</div>
-    </div>
-    """
-
-slider_html += "</div>"
-st.markdown(slider_html, unsafe_allow_html=True)
 
 # ---------- TRAILER USING EXPANDER ----------
 st.subheader("🎬 Watch Trailer")
