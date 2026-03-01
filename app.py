@@ -3,7 +3,7 @@ import pickle
 import pandas as pd
 import requests
 import os
-import gdow
+import gdown
 # ================= PAGE CONFIG =================
 st.set_page_config(
     page_title="Movie Recommender",
@@ -580,4 +580,5 @@ if selected_mood:
             if movie["trailer"]:
                 with st.expander("▶ Watch Trailer"):
                     st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+
 
