@@ -282,7 +282,31 @@ if results:
 
 elif query:
     st.warning("No movies found 😔")
-        
+ # ---------- RECOMMEND BUTTON ----------
+
+        if st.button("🎯 Recommend Similar Movies"):
+
+            recommendations = recommend(selected_movie["title"])
+
+            st.subheader("🎬 Recommended Movies")
+
+            cols = st.columns(5)
+
+            for idx, movie in enumerate(recommendations):
+
+                with cols[idx % 5]:
+
+                    if movie["poster"]:
+                        st.image(movie["poster"])
+
+                    st.markdown(f"**{movie['title']}**")
+                    st.caption(f"⭐ {movie['rating']}")
+
+                    if movie["trailer"]:
+                        with st.expander("▶ Watch Trailer"):
+                            st.video(
+                                f"https://www.youtube.com/watch?v={movie['trailer']}"
+                            )
 # =============== GENRE SECTION WITH MODAL =============== #
 
 st.header("🎭 Browse by Genre")
@@ -407,7 +431,7 @@ for idx, movie in enumerate(popular_movies):
                 st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
 
 #==================== MOOD SECTION ===================
-st.header("🎭 Pick Your Mood")
+st.header("🎭 Pick Movies Based on Your Mood")
 
 selected_mood = st.selectbox(
     "How are you feeling today?",
@@ -415,15 +439,20 @@ selected_mood = st.selectbox(
 )
 
 if selected_mood:
+
     mood_data = MOOD_MAP[selected_mood]
+
     mood_movies = fetch_movies_by_mood(
         mood_data["genres"],
         mood_data["keywords"]
     )
 
+    st.subheader(f"✨ Movies for {selected_mood}")
+
     cols = st.columns(5)
 
     for idx, movie in enumerate(mood_movies):
+
         with cols[idx % 5]:
 
             if movie["poster"]:
@@ -432,8 +461,11 @@ if selected_mood:
             st.markdown(f"**{movie['title']}**")
             st.caption(f"⭐ {movie['rating']}")
 
-          if movie["trailer"]:
-            with st.expander("▶ Watch Trailer"):
-                st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+            if movie["trailer"]:
+                with st.expander("▶ Watch Trailer"):
+                    st.video(
+                        f"https://www.youtube.com/watch?v={movie['trailer']}"
+                    )
 
+  
 
