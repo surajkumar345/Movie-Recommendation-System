@@ -185,6 +185,28 @@ def fetch_movies_by_mood(genre_ids, keywords):
         })
 
     return movies
+
+#------fetch Trending---------
+def fetch_trending_movies():
+    url = f"https://api.themoviedb.org/3/trending/movie/week?api_key={api_key}"
+    data = requests.get(url).json()
+
+    movies = []
+
+    for movie in data["results"][:10]:
+
+        poster = f"https://image.tmdb.org/t/p/w500{movie['poster_path']}" if movie["poster_path"] else None
+        trailer = fetch_trailer(movie["id"])
+
+        movies.append({
+            "id": movie["id"],
+            "title": movie["title"],
+            "poster": poster,
+            "rating": movie["vote_average"],
+            "trailer": trailer
+        })
+
+    return movies
 #============= RECOMMENDATION FUNCTION ===================
 def recommend(movie):
 
@@ -467,7 +489,27 @@ if selected_mood:
                         f"https://www.youtube.com/watch?v={movie['trailer']}"
                     )
 
-  
+#============= TRENDING MOVIES ==============
+st.header("🔥 Trending Movies")
+
+trending_movies = fetch_trending_movies()
+
+cols = st.columns(5)
+
+for idx, movie in enumerate(trending_movies):
+
+    with cols[idx % 5]:
+
+        if movie["poster"]:
+            st.image(movie["poster"])
+
+        st.markdown(f"**{movie['title']}**")
+        st.caption(f"⭐ {movie['rating']}")
+
+        if movie["trailer"]:
+            with st.expander("▶ Watch Trailer"):
+                st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+
 
 
 
