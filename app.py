@@ -229,7 +229,7 @@ def get_recommendation_reason(similarity_score):
             "similarity": similarity_score,
             "trailer": trailer,
             "reason": get_recommendation_reason(similarity_score),
-})
+        })
         
     return recommended
 
@@ -483,6 +483,7 @@ if selected_mood:
                     )
 
   
+
 
 
 
