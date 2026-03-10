@@ -295,30 +295,35 @@ if results:
                 with st.expander("▶ Watch Trailer"):
                     st.video(f"https://www.youtube.com/watch?v={trailer}")
  # ---------- RECOMMEND BUTTON ----------
-        if st.button("🎯 Recommend Similar Movies"):
+       if st.button("🎯 Recommend Similar Movies"):
+           st.session_state.recommendations = recommend(selected_movie["title"])
 
-            recommendations = recommend(selected_movie["title"])
+            if "recommendations" in st.session_state:
 
-            if recommendations:
+                recommendations = st.session_state.recommendations
+
+                st.subheader("🎬 Recommended Movies")
 
                 cols = st.columns(5)
 
                 for idx, movie in enumerate(recommendations):
 
                     with cols[idx % 5]:
+                        
+                        if movie["poster"]:
+                            st.image(movie["poster"])
 
-                       if movie["poster"]:
-                           st.image(movie["poster"])
+                         st.markdown(f"**{movie['title']}**")
+                         st.caption(f"⭐ {movie['rating']}")
+                         st.caption(f"🤖 {movie['reason']}")
 
-                       st.markdown(f"**{movie['title']}**")
-                       st.caption(f"⭐ {movie['rating']}")
-                       st.caption(f"🤖 {movie['reason']}")
-
-                       if movie["trailer"]:
-                           with st.expander("▶ Watch Trailer"):
-                               st.video(
-                                   f"https://www.youtube.com/watch?v={movie['trailer']}"
-                               )
+                         if movie["trailer"]:
+                             with st.expander("▶ Watch Trailer"):
+                                 st.video(
+                                     f"https://www.youtube.com/watch?v={movie['trailer']}"
+                                 )
+                                  
+                               
 
 elif query:
     st.warning("No movies found 😔")
@@ -483,6 +488,7 @@ if selected_mood:
                     )
 
   
+
 
 
 
