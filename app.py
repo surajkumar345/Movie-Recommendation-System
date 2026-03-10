@@ -270,22 +270,24 @@ if menu=="🏠 Home":
 # --------------------------------------------------
 # Recommendation
 # --------------------------------------------------
-
 elif menu=="🎯 Recommend":
 
     st.title("Movie Recommendation")
 
-    selected=st.selectbox("Choose movie",movies["title"].values)
+    movie_name = st.text_input("Type movie name and press Enter")
 
-    if st.button("Recommend"):
+    if movie_name:
 
-        recs=recommend(selected)
+        recs = recommend(movie_name)
 
         if recs is None:
+
             st.error("Movie not found")
 
         else:
-            show_movie_row("Recommended Movies",recs)
+
+            show_movie_row("Recommended Movies", recs)
+
 
 # --------------------------------------------------
 # Trending
@@ -342,3 +344,4 @@ elif menu=="🎭 Actor Movies":
         else:
 
             st.error("Actor not found")
+
