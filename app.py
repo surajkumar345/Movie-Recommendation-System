@@ -2,92 +2,82 @@ import streamlit as st
 import pickle
 import pandas as pd
 import requests
-import os
-import gdown
 
-# ================= PAGE CONFIG =================
-st.set_page_config(
-    page_title="Movie Recommender",
-    page_icon="🎬",
-    layout="wide"
-)
+st.set_page_config(page_title="Movie Recommender",layout="wide")
 
-# ================= DOWNLOAD FILE =================
-if not os.path.exists("similarity.pkl"):
-    gdown.download(
-        "https://drive.google.com/uc?id=1bVtmYxUBJdbm1Mj7mdBpwR71aXkJ80f4",
-        "similarity.pkl",
-        quiet=False
-    )
+# API KEY from secrets
+api_key = st.secrets["TMDB_API_KEY"]
 
-# ================= API KEY =================
-try:
-    api_key = st.secrets["TMDB_API_KEY"]
-except:
-    st.error("TMDB API Key not found.")
-    st.stop()
-
-# ================= LOAD MODEL =================
+# load data
 movies = pickle.load(open("model.pkl","rb"))
 similarity = pickle.load(open("similarity.pkl","rb"))
 
-# ================= MOOD MAP =================
-MOOD_MAP = {
-    "😊 Happy":"35,10751",
-    "😢 Sad":"18,10749",
-    "🔥 Action":"28,12",
-    "❤️ Romantic":"10749",
-    "😱 Thriller":"53,27",
-    "🧠 Mind Bending":"878,9648"
-}
+# --------------------------------------------------
+# Fetch Movie Details
+# --------------------------------------------------
 
-# ================= CSS =================
-st.markdown("""
-<style>
-body{
-background-color:#141414;
-}
+def fetch_movie(movie_id):
 
-.section-title{
-font-size:26px;
-font-weight:700;
-margin-top:20px;
-}
-
-img{
-border-radius:10px;
-transition:0.3s;
-}
-
-img:hover{
-transform:scale(1.08);
-}
-</style>
-""",unsafe_allow_html=True)
-
-# ================= FUNCTIONS =================
-
-def fetch_trailer(movie_id):
-    url=f"https://api.themoviedb.org/3/movie/{movie_id}/videos?api_key={api_key}"
-    data=requests.get(url).json()
-
-    for v in data.get("results",[]):
-        if v["type"]=="Trailer" and v["site"]=="YouTube":
-            return v["key"]
-    return None
-
-
-def fetch_movie_details(movie_id):
     url=f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}"
     data=requests.get(url).json()
 
-    poster=data.get("poster_path")
-    poster=f"https://image.tmdb.org/t/p/w500{poster}" if poster else None
+    poster="https://image.tmdb.org/t/p/w500"+str(data.get("poster_path"))
 
-    return poster,data.get("vote_average"),data.get("overview")
+    return {
+        "title":data.get("title"),
+        "poster":poster,
+        "rating":data.get("vote_average"),
+        "overview":data.get("overview"),
+        "movie_id":movie_id
+    }
 
+# --------------------------------------------------
+# Fetch Trailer
+# --------------------------------------------------
+
+def fetch_trailer(movie_id):
+
+    url=f"https://api.themoviedb.org/3/movie/{movie_id}/videos?api_key={api_key}"
+    data=requests.get(url).json()
+
+    for v in data["results"]:
+        if v["type"]=="Trailer":
+            return v["key"]
+
+    return None
+
+# --------------------------------------------------
+# Movie Recommendation
+# --------------------------------------------------
+
+def recommend(movie):
+
+    if movie not in movies["title"].values:
+        return None
+
+    index=movies[movies["title"]==movie].index[0]
+
+    distances=similarity[index]
+
+    movies_list=sorted(list(enumerate(distances)),
+                       reverse=True,
+                       key=lambda x:x[1])[1:11]
+
+    recommended=[]
+
+    for i in movies_list:
+
+        movie_id=movies.iloc[i[0]].movie_id
+        recommended.append(fetch_movie(movie_id))
+
+    return recommended
+
+# --------------------------------------------------
+# Trending Movies
+# --------------------------------------------------
 
 def fetch_trending():
+
     url=f"https://api.themoviedb.org/3/trending/movie/week?api_key={api_key}"
     data=requests.get(url).json()
 
@@ -95,21 +85,23 @@ def fetch_trending():
 
     for m in data["results"][:10]:
 
-        poster=f"https://image.tmdb.org/t/p/w500{m['poster_path']}" if m["poster_path"] else None
-        trailer=fetch_trailer(m["id"])
+        poster="https://image.tmdb.org/t/p/w500"+str(m["poster_path"])
 
         movies_list.append({
-            "id":m["id"],
             "title":m["title"],
             "poster":poster,
             "rating":m["vote_average"],
-            "trailer":trailer
+            "movie_id":m["id"]
         })
 
     return movies_list
 
+# --------------------------------------------------
+# Popular Movies
+# --------------------------------------------------
 
 def fetch_popular():
+
     url=f"https://api.themoviedb.org/3/movie/popular?api_key={api_key}"
     data=requests.get(url).json()
 
@@ -117,206 +109,236 @@ def fetch_popular():
 
     for m in data["results"][:10]:
 
-        poster=f"https://image.tmdb.org/t/p/w500{m['poster_path']}" if m["poster_path"] else None
-        trailer=fetch_trailer(m["id"])
+        poster="https://image.tmdb.org/t/p/w500"+str(m["poster_path"])
 
         movies_list.append({
-            "id":m["id"],
             "title":m["title"],
             "poster":poster,
             "rating":m["vote_average"],
-            "trailer":trailer
+            "movie_id":m["id"]
         })
 
     return movies_list
 
+# --------------------------------------------------
+# Mood Movies
+# --------------------------------------------------
 
-def fetch_movies_by_genre(genre_id):
-    url=f"https://api.themoviedb.org/3/discover/movie?api_key={api_key}&with_genres={genre_id}"
+mood_dict={
+    "Happy":[35,10751],
+    "Romantic":[10749],
+    "Thriller":[53],
+    "Action":[28],
+    "Sad":[18]
+}
+
+def fetch_mood_movies(mood):
+
+    genres=mood_dict[mood]
+
+    url=f"https://api.themoviedb.org/3/discover/movie?api_key={api_key}&with_genres={genres[0]}"
     data=requests.get(url).json()
 
     movies_list=[]
 
     for m in data["results"][:10]:
 
-        poster=f"https://image.tmdb.org/t/p/w500{m['poster_path']}" if m["poster_path"] else None
-        trailer=fetch_trailer(m["id"])
+        poster="https://image.tmdb.org/t/p/w500"+str(m["poster_path"])
 
         movies_list.append({
-            "id":m["id"],
             "title":m["title"],
             "poster":poster,
             "rating":m["vote_average"],
-            "trailer":trailer
+            "movie_id":m["id"]
         })
 
     return movies_list
 
+# --------------------------------------------------
+# Actor Movies
+# --------------------------------------------------
 
-def fetch_movies_by_mood(genre_id):
+def get_actor_id(actor):
 
-    url=f"https://api.themoviedb.org/3/discover/movie?api_key={api_key}&with_genres={genre_id}&sort_by=popularity.desc"
-
+    url=f"https://api.themoviedb.org/3/search/person?api_key={api_key}&query={actor}"
     data=requests.get(url).json()
+
+    if data["results"]:
+        return data["results"][0]["id"]
+
+    return None
+
+def fetch_actor_movies(actor_id):
+
+    url=f"https://api.themoviedb.org/3/person/{actor_id}/movie_credits?api_key={api_key}"
+    data=requests.get(url).json()
+
+    movies=data.get("cast",[])
+
+    movies=sorted(movies,
+                  key=lambda x:x.get("vote_average",0),
+                  reverse=True)
 
     movies_list=[]
 
-    for m in data["results"][:10]:
+    for m in movies[:10]:
 
-        poster=f"https://image.tmdb.org/t/p/w500{m['poster_path']}" if m["poster_path"] else None
-        trailer=fetch_trailer(m["id"])
+        if m.get("poster_path"):
 
-        movies_list.append({
-            "id":m["id"],
-            "title":m["title"],
-            "poster":poster,
-            "rating":m["vote_average"],
-            "trailer":trailer
-        })
+            poster="https://image.tmdb.org/t/p/w500"+m["poster_path"]
+
+            movies_list.append({
+                "title":m["title"],
+                "poster":poster,
+                "rating":m["vote_average"],
+                "movie_id":m["id"]
+            })
 
     return movies_list
 
+# --------------------------------------------------
+# Display Movie Row
+# --------------------------------------------------
 
-def recommend(movie):
-
-    index=movies[movies["title"]==movie].index[0]
-
-    distances=similarity[index]
-
-    movie_list=sorted(
-        list(enumerate(distances)),
-        reverse=True,
-        key=lambda x:x[1]
-    )[1:11]
-
-    rec=[]
-
-    for i in movie_list:
-
-        movie_id=movies.iloc[i[0]].movie_id
-        title=movies.iloc[i[0]].title
-
-        poster,rating,overview=fetch_movie_details(movie_id)
-        trailer=fetch_trailer(movie_id)
-
-        rec.append({
-            "title":title,
-            "poster":poster,
-            "rating":rating,
-            "overview":overview,
-            "trailer":trailer
-        })
-
-    return rec
-
-
-def show_movie_row(title,movies_list):
+def show_movie_row(title,movies):
 
     st.subheader(title)
 
     cols=st.columns(5)
 
-    for idx,m in enumerate(movies_list):
+    for i,m in enumerate(movies):
 
-        with cols[idx%5]:
+        with cols[i%5]:
 
-            if m["poster"]:
-                st.image(m["poster"])
+            st.image(m["poster"])
 
-            st.markdown(f"**{m['title']}**")
-            st.caption(f"⭐ {m['rating']}")
+            st.caption(m["title"])
 
-            if m["trailer"]:
-                with st.expander("▶ Trailer"):
-                    st.video(f"https://www.youtube.com/watch?v={m['trailer']}")
+            st.write("⭐",m["rating"])
 
-# ================= SIDEBAR =================
+            trailer=fetch_trailer(m["movie_id"])
+
+            if trailer:
+                st.video(f"https://www.youtube.com/watch?v={trailer}")
+
+# --------------------------------------------------
+# Hero Banner
+# --------------------------------------------------
+
+def show_banner():
+
+    movies=fetch_trending()
+
+    banner=movies[0]
+
+    st.image(banner["poster"],use_container_width=True)
+
+    st.markdown(f"## {banner['title']}")
+
+    st.write("⭐",banner["rating"])
+
+# --------------------------------------------------
+# Sidebar
+# --------------------------------------------------
 
 menu=st.sidebar.radio(
 "Navigation",
-["🏠 Home","🔎 Search","🔥 Trending","⭐ Popular","🎭 Genre","😊 Mood"]
+[
+"🏠 Home",
+"🎯 Recommend",
+"🔥 Trending",
+"⭐ Popular",
+"😊 Mood Movies",
+"🎭 Actor Movies"
+]
 )
 
-# ================= HOME =================
+# --------------------------------------------------
+# Home
+# --------------------------------------------------
 
 if menu=="🏠 Home":
 
-    st.title("🎬 Movie Recommendation System")
+    st.title("🎬 Netflix Style Movie Recommender")
 
-    trending=fetch_trending()
-    show_movie_row("🔥 Trending Now",trending)
+    show_banner()
 
-    popular=fetch_popular()
-    show_movie_row("⭐ Popular Movies",popular)
+    show_movie_row("🔥 Trending",fetch_trending())
 
-# ================= TRENDING =================
+    show_movie_row("⭐ Popular",fetch_popular())
+
+# --------------------------------------------------
+# Recommendation
+# --------------------------------------------------
+
+elif menu=="🎯 Recommend":
+
+    st.title("Movie Recommendation")
+
+    selected=st.selectbox("Choose movie",movies["title"].values)
+
+    if st.button("Recommend"):
+
+        recs=recommend(selected)
+
+        if recs is None:
+            st.error("Movie not found")
+
+        else:
+            show_movie_row("Recommended Movies",recs)
+
+# --------------------------------------------------
+# Trending
+# --------------------------------------------------
 
 elif menu=="🔥 Trending":
 
-    trending=fetch_trending()
-    show_movie_row("🔥 Trending Movies",trending)
+    st.title("Trending Movies")
 
-# ================= POPULAR =================
+    show_movie_row("Trending",fetch_trending())
+
+# --------------------------------------------------
+# Popular
+# --------------------------------------------------
 
 elif menu=="⭐ Popular":
 
-    popular=fetch_popular()
-    show_movie_row("⭐ Popular Movies",popular)
+    st.title("Popular Movies")
 
-# ================= GENRE =================
+    show_movie_row("Popular",fetch_popular())
 
-elif menu=="🎭 Genre":
+# --------------------------------------------------
+# Mood
+# --------------------------------------------------
 
-    url=f"https://api.themoviedb.org/3/genre/movie/list?api_key={api_key}"
-    genres=requests.get(url).json()["genres"]
+elif menu=="😊 Mood Movies":
 
-    names=[g["name"] for g in genres]
+    st.title("Mood Based Movies")
 
-    gname=st.selectbox("Select Genre",names)
+    mood=st.selectbox("Select mood",list(mood_dict.keys()))
 
-    gid=None
-    for g in genres:
-        if g["name"]==gname:
-            gid=g["id"]
+    if st.button("Get Movies"):
 
-    movies_list=fetch_movies_by_genre(gid)
+        show_movie_row("Movies for your mood",fetch_mood_movies(mood))
 
-    show_movie_row(f"🎭 {gname} Movies",movies_list)
+# --------------------------------------------------
+# Actor
+# --------------------------------------------------
 
-# ================= MOOD =================
+elif menu=="🎭 Actor Movies":
 
-elif menu=="😊 Mood":
+    st.title("Actor Top Movies")
 
-    mood=st.selectbox("How are you feeling?",list(MOOD_MAP.keys()))
+    actor=st.text_input("Enter actor name")
 
-    movies_list=fetch_movies_by_mood(MOOD_MAP[mood])
+    if st.button("Search"):
 
-    show_movie_row(f"✨ Movies for {mood}",movies_list)
+        actor_id=get_actor_id(actor)
 
-# ================= SEARCH =================
+        if actor_id:
 
-elif menu=="🔎 Search":
+            show_movie_row("Top Movies",fetch_actor_movies(actor_id))
 
-    st.header("Search Movies")
+        else:
 
-    query=st.text_input("Type movie name")
-
-    if query:
-
-        url=f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={query}"
-
-        data=requests.get(url).json()
-
-        results=data.get("results",[])[:8]
-
-        titles=[m["title"] for m in results]
-
-        if titles:
-
-            selected=st.selectbox("Suggestions",titles)
-
-            if st.button("Recommend"):
-
-                recs=recommend(selected)
-
-                show_movie_row("🎬 Recommended Movies",recs)
+            st.error("Actor not found")
