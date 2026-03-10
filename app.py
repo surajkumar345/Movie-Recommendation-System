@@ -164,77 +164,66 @@ def recommend(movie):
 
 # ================ SEARCH SECTION WITH MODAL ============ 
 # ---------------- FUNCTIONS ----------------
+st.header("🔎 Search Movies")
+
+query = st.text_input(
+    "Search",
+    placeholder="Type movie name...",
+)
+
+# ---------- AUTOCOMPLETE FUNCTION ----------
 def autocomplete_movies(query):
     if len(query) < 2:
         return []
 
-    url = "https://api.themoviedb.org/3/search/movie"
-    params = {
-        "api_key": API_KEY,
-        "query": query
-    }
+    url = f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={query}"
+    data = requests.get(url).json()
 
-    data = requests.get(url, params=params).json()
     return data.get("results", [])[:8]
 
 
-def fetch_trailer(movie_id):
-    url = f"https://api.themoviedb.org/3/movie/{movie_id}/videos"
-    params = {"api_key": API_KEY}
-
-    data = requests.get(url, params=params).json()
-
-    for video in data.get("results", []):
-        if video["type"] == "Trailer" and video["site"] == "YouTube":
-            return video["key"]
-    return None
-
-# ---------------- UI ----------------
-st.title("🎬 Movie Search with Autocomplete")
-
-# ✅ USER INPUT (THIS WAS MISSING EARLIER)
-query = st.text_input(
-    "Search Movie",
-    placeholder="Type at least 2 characters..."
-)
-
-# ---------------- AUTOCOMPLETE ----------------
 results = autocomplete_movies(query)
 
-if query and results:
-    titles = [movie["title"] for movie in results]
+# ---------- SHOW SUGGESTIONS ----------
+if results:
+    movie_titles = [movie["title"] for movie in results]
 
     selected_title = st.selectbox(
         "Suggestions",
-        titles,
+        movie_titles,
         label_visibility="collapsed"
     )
 
-    selected_movie = next(
-        movie for movie in results if movie["title"] == selected_title
-    )
+    selected_movie = None
+    for movie in results:
+        if movie["title"] == selected_title:
+            selected_movie = movie
+            break
 
-    poster = (
-        f"https://image.tmdb.org/t/p/w500{selected_movie['poster_path']}"
-        if selected_movie.get("poster_path") else None
-    )
+    if selected_movie:
+        poster = (
+            f"https://image.tmdb.org/t/p/w500{selected_movie['poster_path']}"
+            if selected_movie.get("poster_path") else None
+        )
 
-    st.markdown("## 🎥 Movie Details")
-    col1, col2 = st.columns([1, 2])
+        st.markdown("## 🎬 Movie Details")
 
-    with col1:
-        if poster:
-            st.image(poster)
+        col1, col2 = st.columns([1, 2])
 
-    with col2:
-        st.markdown(f"### {selected_movie['title']}")
-        st.write(f"⭐ Rating: {selected_movie['vote_average']}")
-        st.write(selected_movie.get("overview", "No overview available."))
+        with col1:
+            if poster:
+                st.image(poster)
 
-        trailer = fetch_trailer(selected_movie["id"])
-        if trailer:
-            with st.expander("▶ Watch Trailer"):
-                st.video(f"https://www.youtube.com/watch?v={trailer}")
+        with col2:
+            st.markdown(f"### {selected_movie['title']}")
+            st.write(f"⭐ Rating: {selected_movie['vote_average']}")
+            st.write(selected_movie.get("overview", "No overview available."))
+
+            trailer = fetch_trailer(selected_movie["id"])
+
+            if trailer:
+                with st.expander("▶ Watch Trailer"):
+                    st.video(f"https://www.youtube.com/watch?v={trailer}")
 
 elif query:
     st.warning("No movies found 😔")
@@ -361,5 +350,6 @@ for idx, movie in enumerate(popular_movies):
         if movie["trailer"]:
             with st.expander("▶ Watch Trailer"):
                 st.video(f"https://www.youtube.com/watch?v={movie['trailer']}")
+
 
 
