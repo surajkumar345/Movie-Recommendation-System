@@ -279,11 +279,7 @@ if results:
             if trailer:
                 with st.expander("▶ Watch Trailer"):
                     st.video(f"https://www.youtube.com/watch?v={trailer}")
-
-elif query:
-    st.warning("No movies found 😔")
  # ---------- RECOMMEND BUTTON ----------
-
         if st.button("🎯 Recommend Similar Movies"):
 
             recommendations = recommend(selected_movie["title"])
@@ -307,6 +303,9 @@ elif query:
                             st.video(
                                 f"https://www.youtube.com/watch?v={movie['trailer']}"
                             )
+
+elif query:
+    st.warning("No movies found 😔")
 # =============== GENRE SECTION WITH MODAL =============== #
 
 st.header("🎭 Browse by Genre")
@@ -468,4 +467,5 @@ if selected_mood:
                     )
 
   
+
 
