@@ -313,15 +313,15 @@ if results:
                         if movie["poster"]:
                             st.image(movie["poster"])
 
-                         st.markdown(f"**{movie['title']}**")
-                         st.caption(f"⭐ {movie['rating']}")
-                         st.caption(f"🤖 {movie['reason']}")
+                        st.markdown(f"**{movie['title']}**")
+                        st.caption(f"⭐ {movie['rating']}")
+                        st.caption(f"🤖 {movie['reason']}")
 
-                         if movie["trailer"]:
-                             with st.expander("▶ Watch Trailer"):
-                                 st.video(
-                                     f"https://www.youtube.com/watch?v={movie['trailer']}"
-                                 )
+                        if movie["trailer"]:
+                            with st.expander("▶ Watch Trailer"):
+                                st.video(
+                                    f"https://www.youtube.com/watch?v={movie['trailer']}"
+                                )
                                   
                                
 
@@ -488,6 +488,7 @@ if selected_mood:
                     )
 
   
+
 
 
 
