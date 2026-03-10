@@ -270,24 +270,35 @@ if menu=="🏠 Home":
 # --------------------------------------------------
 # Recommendation
 # --------------------------------------------------
-elif menu=="🎯 Recommend":
+elif menu == "🎯 Recommend":
 
-    st.title("Movie Recommendation")
+    st.title("🎯 Movie Recommendation")
 
-    movie_name = st.text_input("Type movie name and press Enter")
+    # Empty input box
+    movie_name = st.text_input("Enter movie name and press Enter")
 
     if movie_name:
 
-        recs = recommend(movie_name)
+        # Check movie in dataset
+        matched_movies = movies[movies["title"].str.lower() == movie_name.lower()]
 
-        if recs is None:
+        if matched_movies.empty:
 
             st.error("Movie not found")
 
         else:
 
-            show_movie_row("Recommended Movies", recs)
+            movie_title = matched_movies.iloc[0]["title"]
 
+            recs = recommend(movie_title)
+
+            if recs:
+
+                show_movie_row("Recommended Movies", recs)
+
+            else:
+
+                st.error("No recommendations found")
 
 # --------------------------------------------------
 # Trending
@@ -344,4 +355,5 @@ elif menu=="🎭 Actor Movies":
         else:
 
             st.error("Actor not found")
+
 
