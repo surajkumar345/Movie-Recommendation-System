@@ -206,20 +206,6 @@ def recommend(movie):
 
         poster, rating, overview = fetch_movie_details(movie_id)
         trailer = fetch_trailer(movie_id)
-
-def get_recommendation_reason(similarity_score):
-
-    if similarity_score > 0.75:
-        return "Very strong similarity in genre, keywords and storyline."
-
-    elif similarity_score > 0.60:
-        return "Similar genre and plot style."
-
-    elif similarity_score > 0.45:
-        return "Some common themes and movie structure."
-
-    else:
-        return "General recommendation based on movie similarity."
         
         recommended.append({
             "title": title,
@@ -228,7 +214,6 @@ def get_recommendation_reason(similarity_score):
             "overview": overview,
             "similarity": similarity_score,
             "trailer": trailer,
-            "reason": get_recommendation_reason(similarity_score),
         })
         
     return recommended
@@ -296,38 +281,30 @@ if results:
             if trailer:
                 with st.expander("▶ Watch Trailer"):
                     st.video(f"https://www.youtube.com/watch?v={trailer}")
- # ---------- RECOMMEND BUTTON ----------
+ # ---------- RECOMMEND BUTTON -----------
         if st.button("🎯 Recommend Similar Movies"):
 
-            st.session_state.recommendations = recommend(selected_movie["title"])
+            recommendations = recommend(selected_movie["title"])
 
+            st.subheader("🎬 Recommended Movies")
 
-# ---------------- DISPLAY RECOMMENDATIONS ----------------
-recommendations = st.session_state.recommendations
+            cols = st.columns(5)
 
-if recommendations:
+            for idx, movie in enumerate(recommendations):
 
-    st.subheader("🎬 Recommended Movies")
+                with cols[idx % 5]:
 
-    cols = st.columns(5)
+                    if movie["poster"]:
+                        st.image(movie["poster"])
 
-    for idx, movie in enumerate(recommendations):
+                    st.markdown(f"**{movie['title']}**")
+                    st.caption(f"⭐ {movie['rating']}")
 
-        with cols[idx % 5]:
-
-            if movie["poster"]:
-                st.image(movie["poster"])
-
-            st.markdown(f"**{movie['title']}**")
-            st.caption(f"⭐ {movie['rating']}")
-            st.caption(f"🤖 {movie['reason']}")
-
-            if movie["trailer"]:
-                with st.expander("▶ Watch Trailer"):
-                    st.video(
-                        f"https://www.youtube.com/watch?v={movie['trailer']}"
-                    )      
-                
+                    if movie["trailer"]:
+                        with st.expander("▶ Watch Trailer"):
+                            st.video(
+                                f"https://www.youtube.com/watch?v={movie['trailer']}"
+                            )                
 elif query:
     st.warning("No movies found 😔")
 # =============== GENRE SECTION WITH MODAL =============== #
@@ -491,6 +468,7 @@ if selected_mood:
                     )
 
   
+
 
 
 
