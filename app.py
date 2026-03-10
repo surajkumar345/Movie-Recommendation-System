@@ -295,8 +295,8 @@ if results:
                 with st.expander("▶ Watch Trailer"):
                     st.video(f"https://www.youtube.com/watch?v={trailer}")
  # ---------- RECOMMEND BUTTON ----------
-       if st.button("🎯 Recommend Similar Movies"):
-           st.session_state.recommendations = recommend(selected_movie["title"])
+        if st.button("🎯 Recommend Similar Movies"):
+            st.session_state.recommendations = recommend(selected_movie["title"])
 
             if "recommendations" in st.session_state:
 
@@ -488,6 +488,7 @@ if selected_mood:
                     )
 
   
+
 
 
 
