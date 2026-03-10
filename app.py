@@ -207,6 +207,20 @@ def recommend(movie):
         poster, rating, overview = fetch_movie_details(movie_id)
         trailer = fetch_trailer(movie_id)
 
+def get_recommendation_reason(similarity_score):
+
+    if similarity_score > 0.75:
+        return "Very strong similarity in genre, keywords and storyline."
+
+    elif similarity_score > 0.60:
+        return "Similar genre and plot style."
+
+    elif similarity_score > 0.45:
+        return "Some common themes and movie structure."
+
+    else:
+        return "General recommendation based on movie similarity."
+        
         recommended.append({
             "title": title,
             "poster": poster,
@@ -214,8 +228,9 @@ def recommend(movie):
             "overview": overview,
             "similarity": similarity_score,
             "trailer": trailer,
-        })
-
+            "reason": get_recommendation_reason(similarity_score),
+})
+        
     return recommended
 
 # ================ SEARCH SECTION WITH MODAL ============ 
@@ -297,6 +312,7 @@ if results:
 
                     st.markdown(f"**{movie['title']}**")
                     st.caption(f"⭐ {movie['rating']}")
+                    st.caption(f"🤖 {movie['reason']}")
 
                     if movie["trailer"]:
                         with st.expander("▶ Watch Trailer"):
@@ -467,5 +483,6 @@ if selected_mood:
                     )
 
   
+
 
 
