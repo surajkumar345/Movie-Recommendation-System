@@ -22,6 +22,39 @@ movies = pd.DataFrame(movie_dict)
 
 similarity = pickle.load(open("similarity.pkl","rb"))
 
+#========= CSS CUSTOM =======================
+st.markdown("""
+<style>
+
+body {
+background-color:#0f0f0f;
+color:white;
+}
+
+.stApp {
+background-color:#0f0f0f;
+}
+
+h1,h2,h3,h4,h5,h6{
+color:white;
+}
+
+section[data-testid="stSidebar"]{
+background-color:#141414;
+}
+
+button[kind="primary"]{
+background-color:#E50914;
+color:white;
+border:none;
+}
+
+button:hover{
+background-color:#b20710;
+}
+
+</style>
+""", unsafe_allow_html=True)
 # --------------------------------------------------
 # Fetch Movie Details
 # --------------------------------------------------
@@ -347,6 +380,7 @@ elif menu=="🎭 Actor Movies":
         else:
 
             st.error("Actor not found")
+
 
 
 
