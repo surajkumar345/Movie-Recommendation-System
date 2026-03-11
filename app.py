@@ -2,6 +2,14 @@ import streamlit as st
 import pickle
 import pandas as pd
 import requests
+import os
+import gdown
+
+file_id = "1CReMVOK7gdNfru5Dnyu4tsjiOYf493Ej"
+url = f"https://drive.google.com/uc?id={file_id}"
+
+if not os.path.exists("similarity.pkl"):
+    gdown.download(url, "similarity.pkl", quiet=False)
 
 st.set_page_config(page_title="Movie Recommender",layout="wide")
 
@@ -339,6 +347,7 @@ elif menu=="🎭 Actor Movies":
         else:
 
             st.error("Actor not found")
+
 
 
 
