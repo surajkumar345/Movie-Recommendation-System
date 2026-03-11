@@ -196,7 +196,45 @@ def fetch_mood_movies(mood):
         })
 
     return movies_list
+#---------------------------------------------
+# Genre Based Movies
+#----------------------------------------------
+genre_dict = {
+    "Action": 28,
+    "Adventure": 12,
+    "Animation": 16,
+    "Comedy": 35,
+    "Crime": 80,
+    "Drama": 18,
+    "Fantasy": 14,
+    "Horror": 27,
+    "Romance": 10749,
+    "Science Fiction": 878,
+    "Thriller": 53
+}
 
+def fetch_genre_movies(genre_id):
+
+    url = f"https://api.themoviedb.org/3/discover/movie?api_key={api_key}&with_genres={genre_id}"
+
+    data = requests.get(url).json()
+
+    movies_list = []
+
+    for m in data["results"][:10]:
+
+        if m["poster_path"]:
+
+            poster = "https://image.tmdb.org/t/p/w500" + m["poster_path"]
+
+            movies_list.append({
+                "title": m["title"],
+                "poster": poster,
+                "rating": m["vote_average"],
+                "movie_id": m["id"]
+            })
+
+    return movies_list
 # --------------------------------------------------
 # Actor Movies
 # --------------------------------------------------
@@ -273,6 +311,7 @@ menu=st.sidebar.radio(
 [
 "🏠 Home",
 "🎯 Recommend",
+"🎭 Genre Movies",
 "🔥 Trending",
 "⭐ Popular",
 "😊 Mood Movies",
@@ -381,6 +420,24 @@ elif menu=="🎭 Actor Movies":
         else:
 
             st.error("Actor not found")
+
+#-----------------------------------------
+# Genre Recommend
+#----------------------------------------
+elif menu == "🎭 Genre Movies":
+
+    st.title("🎭 Genre Based Movies")
+
+    genre = st.selectbox("Select Genre", list(genre_dict.keys()))
+
+    if st.button("Get Movies"):
+
+        genre_id = genre_dict[genre]
+
+        movies = fetch_genre_movies(genre_id)
+
+        show_movie_row(f"{genre} Movies", movies)
+
 
 
 
