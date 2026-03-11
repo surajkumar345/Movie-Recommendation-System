@@ -255,8 +255,6 @@ if menu=="🏠 Home":
 
     st.title("🎬 Netflix Style Movie Recommender")
 
-    show_banner()
-
     show_movie_row("🔥 Trending",fetch_trending())
 
     show_movie_row("⭐ Popular",fetch_popular())
@@ -349,6 +347,7 @@ elif menu=="🎭 Actor Movies":
         else:
 
             st.error("Actor not found")
+
 
 
 
