@@ -299,32 +299,33 @@ elif menu == "🎯 Recommend":
 
     st.title("🎯 Movie Recommendation")
 
-    # Empty input box
-    movie_name = st.text_input("Enter movie name and press Enter")
+    movie_input = st.text_input("Type movie name")
 
-    if movie_name:
+    if movie_input:
 
-        # Check movie in dataset
-        matched_movies = movies[movies["title"].str.lower() == movie_name.lower()]
+        # Autocomplete suggestions
+        suggestions = movies[
+            movies["title"].str.lower().str.contains(movie_input.lower())
+        ]["title"].values[:10]
 
-        if matched_movies.empty:
+        if len(suggestions) > 0:
 
-            st.error("Movie not found")
+            selected_movie = st.selectbox(
+                "Did you mean?",
+                suggestions
+            )
 
-        else:
-
-            movie_title = matched_movies.iloc[0]["title"]
-
-            recs = recommend(movie_title)
+            recs = recommend(selected_movie)
 
             if recs:
 
                 show_movie_row("Recommended Movies", recs)
 
-            else:
+        else:
 
-                st.error("No recommendations found")
+            st.error("Movie not found")
 
+        
 # --------------------------------------------------
 # Trending
 # --------------------------------------------------
@@ -380,6 +381,7 @@ elif menu=="🎭 Actor Movies":
         else:
 
             st.error("Actor not found")
+
 
 
 
