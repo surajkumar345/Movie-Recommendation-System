@@ -17,7 +17,9 @@ st.set_page_config(page_title="Movie Recommender",layout="wide")
 api_key = st.secrets["TMDB_API_KEY"]
 
 # load data
-movies = pickle.load(open("model.pkl","rb"))
+movie_dict = pickle.load(open("movie_dict.pkl","rb"))
+movies = pd.DataFrame(movie_dict)
+
 similarity = pickle.load(open("similarity.pkl","rb"))
 
 # --------------------------------------------------
@@ -347,6 +349,7 @@ elif menu=="🎭 Actor Movies":
         else:
 
             st.error("Actor not found")
+
 
 
 
