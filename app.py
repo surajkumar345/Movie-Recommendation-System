@@ -222,22 +222,6 @@ def show_movie_row(title,movies):
                 st.video(f"https://www.youtube.com/watch?v={trailer}")
 
 # --------------------------------------------------
-# Hero Banner
-# --------------------------------------------------
-
-def show_banner():
-
-    movies=fetch_trending()
-
-    banner=movies[0]
-
-    st.image(banner["poster"],use_container_width=True)
-
-    st.markdown(f"## {banner['title']}")
-
-    st.write("⭐",banner["rating"])
-
-# --------------------------------------------------
 # Sidebar
 # --------------------------------------------------
 
@@ -355,5 +339,6 @@ elif menu=="🎭 Actor Movies":
         else:
 
             st.error("Actor not found")
+
 
 
