@@ -277,6 +277,34 @@ def fetch_actor_movies(actor_id):
 
     return movies_list
 
+#-----------------------------------------
+# Movies Details
+#-----------------------------------------
+def show_movie_details(movie):
+
+    st.title(movie["title"])
+
+    col1, col2 = st.columns([1,2])
+
+    with col1:
+        st.image(movie["poster"])
+
+    with col2:
+        st.write("⭐ Rating:", movie["rating"])
+        st.write(movie.get("overview","No overview available"))
+
+    trailer = fetch_trailer(movie["movie_id"])
+
+    if trailer:
+        st.video(f"https://www.youtube.com/watch?v={trailer}")
+
+    # Similar movies
+    st.subheader("Similar Movies")
+
+    recs = recommend(movie["title"])
+
+    if recs:
+        show_movie_row("You may also like", recs)
 # --------------------------------------------------
 # Display Movie Row
 # --------------------------------------------------
@@ -290,6 +318,9 @@ def show_movie_row(title,movies):
     for i,m in enumerate(movies):
 
         with cols[i%5]:
+
+            if st.button("", key=f"poster_{m['movie_id']}"):
+                show_movie_details(m)
 
             st.image(m["poster"])
 
@@ -437,6 +468,7 @@ elif menu == "🎭 Genre Movies":
         movies = fetch_genre_movies(genre_id)
 
         show_movie_row(f"{genre} Movies", movies)
+
 
 
 
