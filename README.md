@@ -10,11 +10,14 @@ A content-based Movie Recommendation System built using:
 
 ## Features
 
-✔ Recommends 5 similar movies  
+✔ Recommends 10 similar movies  
 ✔ Displays movie posters  
 ✔ Clean Netflix-style UI  
 ✔ Built using machine learning similarity matrix  
-
+- There are many section
+- genre
+- mood
+- actor
 ## How to Run
 
 pip install -r requirements.txt
